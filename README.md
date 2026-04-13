@@ -1,9 +1,14 @@
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+TODO: This is a sample pipeline project for end-end workflow of a regression model
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
+TODO: Instructions
+1.	Set up process:
+    Create an account with azure devops
+    Create a pipeline project
+2. Source files
+    Download the csv files into your repos folder
+    download the source code
 2.	Software dependencies
 3.	Latest releases
 4.	API references
