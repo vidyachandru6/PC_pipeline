@@ -1,0 +1,28 @@
+pr: none
+trigger: none
+variables:
+- group: '$(AZURE_RM_SVC_CONNECTION)'
+
+stages:
+- stage: dev
+  displayname: dev
+  jobs:
+  - job "Provision Dev"
+    displayname: "Provision Dev Resources"
+    pool:
+       vmimage: 'ubuntu-latest'
+    timeoutInMinutes: 0
+    steps:
+    - task: AzureResourceGroupDeployment@2
+      inputs:
+        azureSubscription: 'PCPipeline_connection'
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: '$(RESOURCE_GROUP)'
+        location: $(LOCATION)
+        templateLocation: 'Linked_artifact'
+        csmfile: '$(Build.SourcesDirectory)/environment_setup/cloud-environment.json'
+        overrideParameters: '-baseName $(BASE_NAME) -Location $(LOCATION) -workspace $(WORKSPACE_NAME)'
+        deploymentMode: 'Incremental'
+      displayName: 'Deploy OH resource to Azure'
+
+
