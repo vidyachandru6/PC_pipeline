@@ -1,0 +1,213 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "name": "Get Metadata excel files in blob",
+        "description": "Get metadata of blob excel files",
+        "type": "GetMetadata",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "fieldList": [
+            "childItems"
+          ],
+          "datasetSettings": {
+            "annotations": [],
+            "type": "Excel",
+            "typeProperties": {
+              "location": {
+                "type": "AzureBlobStorageLocation",
+                "folderPath": "RawData",
+                "container": "ntxwthrfmplln"
+              },
+              "sheetIndex": 0
+            },
+            "schema": [],
+            "externalReferences": {
+              "connection": "6e2c3ef9-6289-4559-bec2-829feb93f6b1"
+            }
+          },
+          "storeSettings": {
+            "type": "AzureBlobStorageReadSettings",
+            "recursive": true,
+            "enablePartitionDiscovery": false
+          }
+        }
+      },
+      {
+        "name": "Filter_excel_files",
+        "description": "Filter excel files from blob storage",
+        "type": "Filter",
+        "dependsOn": [
+          {
+            "activity": "Get Metadata excel files in blob",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "typeProperties": {
+          "items": {
+            "value": "@activity('Get Metadata excel files in blob').output.childItems",
+            "type": "Expression"
+          },
+          "condition": {
+            "value": "@endswith(item().name,'.xlsx')",
+            "type": "Expression"
+          }
+        }
+      },
+      {
+        "name": "ForEach excel file in blob",
+        "description": "Iterate through each excel file in the blob storage",
+        "type": "ForEach",
+        "dependsOn": [
+          {
+            "activity": "Filter_excel_files",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "typeProperties": {
+          "items": {
+            "value": "@activity('Filter_excel_files').output.value",
+            "type": "Expression"
+          },
+          "batchCount": 2,
+          "activities": [
+            {
+              "name": "Copy excel files to lakehouse",
+              "description": "Copy multiple excel files to lakehouse",
+              "type": "Copy",
+              "dependsOn": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "source": {
+                  "type": "ExcelSource",
+                  "storeSettings": {
+                    "type": "AzureBlobStorageReadSettings",
+                    "recursive": true,
+                    "enablePartitionDiscovery": false
+                  },
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "Excel",
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "fileName": {
+                          "value": "@item().name",
+                          "type": "Expression"
+                        },
+                        "folderPath": "RawData",
+                        "container": "ntxwthrfmplln"
+                      },
+                      "sheetIndex": 0
+                    },
+                    "schema": [],
+                    "externalReferences": {
+                      "connection": "6e2c3ef9-6289-4559-bec2-829feb93f6b1"
+                    }
+                  }
+                },
+                "sink": {
+                  "type": "DelimitedTextSink",
+                  "storeSettings": {
+                    "type": "AzureBlobStorageWriteSettings"
+                  },
+                  "formatSettings": {
+                    "type": "DelimitedTextWriteSettings",
+                    "fileExtension": ".txt"
+                  },
+                  "datasetSettings": {
+                    "annotations": [],
+                    "linkedService": {
+                      "name": "PLDataLakeHouse",
+                      "properties": {
+                        "annotations": [],
+                        "type": "Lakehouse",
+                        "typeProperties": {
+                          "workspaceId": "1eae7a41-187c-448d-b33a-39a7f731ab8f",
+                          "artifactId": "16554174-10d3-4fb6-9c88-76c2efb59b51",
+                          "rootFolder": "Files"
+                        }
+                      }
+                    },
+                    "type": "DelimitedText",
+                    "typeProperties": {
+                      "location": {
+                        "type": "LakehouseLocation",
+                        "fileName": {
+                          "value": "@replace(item().name, '.xlsx','.csv')",
+                          "type": "Expression"
+                        },
+                        "folderPath": "PD_RawData"
+                      },
+                      "columnDelimiter": ",",
+                      "escapeChar": "\\",
+                      "firstRowAsHeader": true,
+                      "quoteChar": "\""
+                    },
+                    "schema": []
+                  }
+                },
+                "enableStaging": false,
+                "translator": {
+                  "type": "TabularTranslator",
+                  "typeConversion": true,
+                  "typeConversionSettings": {
+                    "allowDataTruncation": true,
+                    "treatBooleanAsNumber": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "Notebook to perform dataprep",
+        "description": "Notebook activity to use Pyspark/Python code to prepare raw data and get a csv file",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "ForEach excel file in blob",
+            "dependencyConditions": [
+              "Completed"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "3b1c27a6-8fec-4a8a-820d-0da54ae47da2",
+          "workspaceId": "1eae7a41-187c-448d-b33a-39a7f731ab8f"
+        }
+      }
+    ],
+    "variables": {
+      "MyExcelFiles": {
+        "type": "String",
+        "defaultValue": "'DataPrep_2021_23.xlsx'"
+      }
+    }
+  }
+}

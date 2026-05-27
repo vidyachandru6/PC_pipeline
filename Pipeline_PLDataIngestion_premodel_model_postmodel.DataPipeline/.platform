@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "DataPipeline",
+    "displayName": "Pipeline_PLDataIngestion_premodel_model_postmodel",
+    "description": "Pipeline containing pre post model dataprep and model training testing"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "8f89c5c4-8d81-ade0-4dbe-35ad2ed6629f"
+  }
+}
