@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "name": "Pre_Post_model dataprep classes",
+        "description": "Notebook activity containing python script with data prep classes pre post model",
+        "type": "TridentNotebook",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "e8379708-01d3-4f97-b1ae-d23a9bfd78a6",
+          "workspaceId": "1eae7a41-187c-448d-b33a-39a7f731ab8f"
+        }
+      },
+      {
+        "name": "Notebook activity for traning and validation",
+        "description": "Notebook activity containing model",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "Pre_Post_model dataprep classes",
+            "dependencyConditions": [
+              "Completed"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "14cf784c-b8b2-4669-be16-3f782cfbdb56",
+          "workspaceId": "1eae7a41-187c-448d-b33a-39a7f731ab8f",
+          "parameters": {
+            "_inlineInstallationEnabled": {
+              "value": "True",
+              "type": "bool"
+            }
+          }
+        }
+      }
+    ],
+    "variables": {
+      "MyExcelFiles": {
+        "type": "String",
+        "defaultValue": "'DataPrep_2021_23.xlsx'"
+      }
+    }
+  }
+}
