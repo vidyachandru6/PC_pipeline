@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "DataPipeline",
+    "displayName": "Pipeline_PLDataIngestion_daily_dataload_prep_stage1",
+    "description": "This pipeline loads data from blob to lakehouse and contains python script for 1st stage of dataprep"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "9d843791-e0e6-825d-48bb-017160f7b6c4"
+  }
+}
